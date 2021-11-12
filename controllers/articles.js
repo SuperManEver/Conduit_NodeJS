@@ -1,5 +1,3 @@
-const Article = require('../models/Article');
-
 const { User, Tag, Article } = require('../models');
 const { slugify } = require('../utils/stringUtil');
 const sequelize = require('../dbConnection');

@@ -1,6 +1,6 @@
 const { User, Tag, Article } = require('../models');
 const { slugify } = require('../utils/stringUtil');
-const sequelize = require('../dbConnection');
+const { sequelize } = require('../services/db');
 
 function sanitizeOutput(article, user) {
   const newTagList = [];

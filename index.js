@@ -20,6 +20,7 @@ const app = express();
 //CORS
 app.use(cors({ credentials: true, origin: true }));
 
+// what this does??
 const sync = async () => await sequelize.sync({ alter: true });
 sync();
 

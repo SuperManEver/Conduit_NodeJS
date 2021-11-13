@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../dbConnection');
+const { sequelize } = require('../services/db');
 
 const Article = sequelize.define('Article', {
   slug: {

@@ -1,7 +1,7 @@
-const User = require('./models/User');
-const Article = require('./models/Article');
-const Tag = require('./models/Tag');
-const Comment = require('./models/Comments');
+const User = require('./User');
+const Article = require('./Article');
+const Tag = require('./Tag');
+const Comment = require('./Comments');
 
 //RELATIONS:
 //1 to many relation between user and article

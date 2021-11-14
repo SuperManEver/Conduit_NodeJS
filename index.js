@@ -1,10 +1,12 @@
-const dotenv = require('dotenv').config();
+require('dotenv').config();
+
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 const { dbConnect } = require('./services/db');
+const { PORT } = require('./config');
 
 const { Article, User, Tag, Comment } = require('./models');
 
@@ -39,8 +41,6 @@ app.use('/api/articles', favouriteRoute);
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 8080;
-
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:8080`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });

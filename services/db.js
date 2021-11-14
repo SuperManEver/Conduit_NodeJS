@@ -22,6 +22,7 @@ checkConnection();
 
 module.exports = {
   dbConnect,
+  sequelize: dbConnect,
   Sequelize,
   QueryTypes,
   DataTypes,

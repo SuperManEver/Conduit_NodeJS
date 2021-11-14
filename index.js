@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 
 const { notFound, errorHandler } = require('./middleware/errorHandler');
-const sequelize = require('./dbConnection');
+const { dbConnect } = require('./services/db');
 
 const { Article, User, Tag, Comment } = require('./models');
 
@@ -21,7 +21,7 @@ const app = express();
 app.use(cors({ credentials: true, origin: true }));
 
 // what this does??
-const sync = async () => await sequelize.sync({ alter: true });
+const sync = async () => await dbConnect.sync({ alter: true });
 sync();
 
 app.use(express.json());

@@ -4,6 +4,7 @@ const { sign, decode } = require('../utils/jwt');
 
 module.exports.createUser = async (req, res) => {
   try {
+    // @todo: add 'joy' for input validation
     if (!req.body.user.username) throw new Error('Username is Required');
     if (!req.body.user.email) throw new Error('Email is Required');
     if (!req.body.user.password) throw new Error('Password is Required');
@@ -12,6 +13,7 @@ module.exports.createUser = async (req, res) => {
     if (existingUser)
       throw new Error('User aldready exists with this email id');
 
+    // @todo: should be done through life cycle hook
     const password = await hashPassword(req.body.user.password);
     const user = await User.create({
       username: req.body.user.username,
@@ -20,6 +22,7 @@ module.exports.createUser = async (req, res) => {
     });
 
     if (user) {
+      // @todo: add serializer
       if (user.dataValues.password) delete user.dataValues.password;
       user.dataValues.token = await sign(user);
       user.dataValues.bio = null;

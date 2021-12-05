@@ -48,7 +48,7 @@ module.exports.createArticle = async (req, res) => {
     if (!data.body) throw new Error('Article body is required');
     if (!data.description) throw new Error('Article description is required');
 
-    //Find out author object
+    // Find out author object
     const user = await User.findByPk(req.user.email);
     if (!user) throw new Error('User does not exist');
     const slug = slugify(data.title);
@@ -259,6 +259,8 @@ module.exports.getAllArticles = async (req, res) => {
 };
 
 module.exports.getFeed = async (req, res) => {
+  console.log('getFeed');
+
   try {
     const query = `
             SELECT UserEmail

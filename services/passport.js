@@ -50,7 +50,7 @@ passport.use(
     },
     async (jwtPaylod, done) => {
       try {
-        const user = await User.findById(jwtPaylod.user._id);
+        const user = await User.findOne({ where: { email: jwtPaylod.email } });
 
         done(null, user);
       } catch (err) {

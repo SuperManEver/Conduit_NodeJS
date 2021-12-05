@@ -1,6 +1,6 @@
 const { User } = require('../models');
 const { hashPassword, matchPassword } = require('../utils/password');
-const { sign, decode } = require('../utils/jwt');
+const { signAccessToken } = require('../utils/auth');
 
 async function createUser(req, res) {
   try {
@@ -9,24 +9,21 @@ async function createUser(req, res) {
     if (!req.body.user.email) throw new Error('Email is Required');
     if (!req.body.user.password) throw new Error('Password is Required');
 
+    // @todo: this step can be extracted to middleware??
     const existingUser = await User.findByPk(req.body.user.email);
 
     if (existingUser) {
       throw new Error('User already exists with this email id');
     }
 
-    // @todo: should be done through life cycle hook
-    const password = await hashPassword(req.body.user.password);
-    const user = await User.create({
-      username: req.body.user.username,
-      password: password,
-      email: req.body.user.email,
-    });
+    const user = await User.create(req.body.user);
 
     if (user) {
-      // @todo: add serializer
-      if (user.dataValues.password) delete user.dataValues.password;
-      user.dataValues.token = await sign(user);
+      if (user.dataValues.password) {
+        delete user.dataValues.password;
+      }
+
+      user.dataValues.token = await signAccessToken(user.dataValues);
       user.dataValues.bio = null;
       user.dataValues.image = null;
       res.status(201).json({ user });
@@ -62,7 +59,7 @@ async function loginUser(req, res) {
     }
 
     delete user.dataValues.password;
-    user.dataValues.token = await sign({
+    user.dataValues.token = await signAccessToken({
       email: user.dataValues.email,
       username: user.dataValues.username,
     });

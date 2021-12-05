@@ -7,8 +7,7 @@ const cors = require('cors');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 const { dbConnect } = require('./services/db');
 const { PORT } = require('./config');
-
-const { Article, User, Tag, Comment } = require('./models');
+const { passport, session } = require('./services/passport');
 
 const userRoute = require('./routes/users');
 const articleRoute = require('./routes/articles');
@@ -19,7 +18,11 @@ const favouriteRoute = require('./routes/favourites');
 
 const app = express();
 
-//CORS
+app.use(session);
+app.use(passport.initialize());
+app.use(passport.session());
+
+// CORS
 app.use(cors({ credentials: true, origin: true }));
 
 // what this does??

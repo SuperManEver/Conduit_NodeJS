@@ -1,5 +1,7 @@
+const bcrypt = require('bcrypt');
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../services/db');
+const { encryptPassword } = require('../utils/auth');
 
 const User = sequelize.define(
   'User',
@@ -31,6 +33,10 @@ const User = sequelize.define(
     timestamps: false,
   },
 );
+
+User.beforeCreate(async (user) => {
+  user.password = await encryptPassword(user.password);
+});
 
 User.comparePassword = (candidatePassword, password, next) => {
   bcrypt.compare(candidatePassword, password, (err, same) => {

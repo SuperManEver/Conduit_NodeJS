@@ -32,10 +32,13 @@ const User = sequelize.define(
   },
 );
 
-module.exports = User;
+User.comparePassword = (candidatePassword, password, next) => {
+  bcrypt.compare(candidatePassword, password, (err, same) => {
+    if (err) {
+      return next(err);
+    }
+    next(null, same);
+  });
+};
 
-/* {
-  "user": {
-    "token": "jwt.token.here",
-  }
-} */
+module.exports = User;

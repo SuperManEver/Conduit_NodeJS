@@ -107,11 +107,15 @@ module.exports.updateUserDetails = async (req, res) => {
       const bio = req.body.user.bio ? req.body.user.bio : user.bio;
       const image = req.body.user.image ? req.body.user.image : user.image;
       let password = user.password;
-      if (req.body.user.password)
+
+      if (req.body.user.password) {
         password = await hashPassword(req.body.user.password);
+      }
 
       const updatedUser = await user.update({ username, bio, image, password });
       delete updatedUser.dataValues.password;
+
+      // @todo: this should be done through middle ware
       updatedUser.dataValues.token = req.header('Authorization').split(' ')[1];
       res.json({ user: updatedUser });
     } else {

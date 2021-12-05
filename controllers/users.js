@@ -103,6 +103,7 @@ module.exports.updateUserDetails = async (req, res) => {
       const username = req.body.user.username
         ? req.body.user.username
         : user.username;
+
       const bio = req.body.user.bio ? req.body.user.bio : user.bio;
       const image = req.body.user.image ? req.body.user.image : user.image;
       let password = user.password;
@@ -112,7 +113,7 @@ module.exports.updateUserDetails = async (req, res) => {
       const updatedUser = await user.update({ username, bio, image, password });
       delete updatedUser.dataValues.password;
       updatedUser.dataValues.token = req.header('Authorization').split(' ')[1];
-      res.json(updatedUser);
+      res.json({ user: updatedUser });
     } else {
       delete user.dataValues.password;
       user.dataValues.token = req.header('Authorization').split(' ')[1];

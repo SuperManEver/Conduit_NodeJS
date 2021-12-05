@@ -1,11 +1,10 @@
 const bcrypt = require('bcrypt');
 
-// @todo: extract to .env
-const SALT_ROUNDS = 10;
+const { SALT_WORK_FACTOR } = require('../config');
 
 module.exports.hashPassword = (password) => {
   return new Promise((resolve, reject) => {
-    bcrypt.hash(password, SALT_ROUNDS, (err, encrypted) => {
+    bcrypt.hash(password, SALT_WORK_FACTOR, (err, encrypted) => {
       if (err) return reject(err);
 
       resolve(encrypted);
@@ -21,14 +20,3 @@ module.exports.matchPassword = (hash, password) => {
     });
   });
 };
-
-//TESTING
-/* async function test() {
-    const pass = 'asdf'
-    const hash = await hashPassword(pass)
-    console.log("HASH:",hash); 
-    const match = await matchPassword(hash,'asdf')
-    console.log("Password matches:",match);
-}
-
-test(); */

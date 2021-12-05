@@ -2,7 +2,7 @@ const { User } = require('../models');
 const { hashPassword, matchPassword } = require('../utils/password');
 const { sign, decode } = require('../utils/jwt');
 
-module.exports.createUser = async (req, res) => {
+async function createUser(req, res) {
   try {
     // @todo: add 'joy' for input validation
     if (!req.body.user.username) throw new Error('Username is Required');
@@ -10,8 +10,10 @@ module.exports.createUser = async (req, res) => {
     if (!req.body.user.password) throw new Error('Password is Required');
 
     const existingUser = await User.findByPk(req.body.user.email);
-    if (existingUser)
-      throw new Error('User aldready exists with this email id');
+
+    if (existingUser) {
+      throw new Error('User already exists with this email id');
+    }
 
     // @todo: should be done through life cycle hook
     const password = await hashPassword(req.body.user.password);
@@ -34,9 +36,9 @@ module.exports.createUser = async (req, res) => {
       .status(422)
       .json({ errors: { body: ['Could not create user ', e.message] } });
   }
-};
+}
 
-module.exports.loginUser = async (req, res) => {
+async function loginUser(req, res) {
   try {
     if (!req.body.user.email) throw new Error('Email is Required');
     if (!req.body.user.password) throw new Error('Password is Required');
@@ -48,7 +50,7 @@ module.exports.loginUser = async (req, res) => {
       throw new Error('No User with this email id');
     }
 
-    //Check if password matches
+    // Check if password matches
     const passwordMatch = await matchPassword(
       user.password,
       req.body.user.password,
@@ -72,9 +74,9 @@ module.exports.loginUser = async (req, res) => {
       .status(status)
       .json({ errors: { body: ['Could not create user ', e.message] } });
   }
-};
+}
 
-module.exports.getUserByEmail = async (req, res) => {
+async function getUserByEmail(req, res) {
   try {
     const user = await User.findByPk(req.user.email);
     if (!user) {
@@ -88,9 +90,9 @@ module.exports.getUserByEmail = async (req, res) => {
       errors: { body: [e.message] },
     });
   }
-};
+}
 
-module.exports.updateUserDetails = async (req, res) => {
+async function updateUserDetails(req, res) {
   try {
     const user = await User.findByPk(req.user.email);
 
@@ -129,4 +131,11 @@ module.exports.updateUserDetails = async (req, res) => {
       errors: { body: [e.message] },
     });
   }
+}
+
+module.exports = {
+  updateUserDetails,
+  createUser,
+  loginUser,
+  getUserByEmail,
 };

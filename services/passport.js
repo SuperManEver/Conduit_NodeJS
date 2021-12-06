@@ -12,11 +12,13 @@ const ExtractJWT = passportJWT.ExtractJwt;
 
 passport.use(
   new LocalStrategy(
-    {
-      usernameField: 'email',
-    },
+    // {
+    //   usernameField: 'email',
+    // },
     async (email, password, done) => {
       try {
+        console.log('LocalStrategy: ', email, password);
+
         const user = await User.findOne({
           where: {
             email,

@@ -22,15 +22,14 @@ app.use(session);
 app.use(passport.initialize());
 app.use(passport.session());
 
-// CORS
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(cors({ credentials: true, origin: true }));
+app.use(morgan('tiny'));
 
 // what this does??
 const sync = async () => await dbConnect.sync({ alter: true });
 sync();
-
-app.use(express.json());
-app.use(morgan('tiny'));
 
 app.get('/', (req, res) => {
   res.json({ status: 'API is running' });

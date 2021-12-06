@@ -39,6 +39,8 @@ User.beforeCreate(async (user) => {
 });
 
 User.comparePassword = (candidatePassword, password, next) => {
+  console.log('comparePassword: ', candidatePassword, password);
+
   bcrypt.compare(candidatePassword, password, (err, same) => {
     if (err) {
       return next(err);

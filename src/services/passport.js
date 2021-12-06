@@ -1,5 +1,7 @@
+const path = require('path');
+const process = require('process');
 const passport = require('passport');
-const LocalStrategy = require('passport-local');
+const LocalStrategy = require('passport-local').Strategy;
 const passportJWT = require('passport-jwt');
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
@@ -11,37 +13,32 @@ const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 
 passport.use(
-  new LocalStrategy(
-    // {
-    //   usernameField: 'email',
-    // },
-    async (email, password, done) => {
-      try {
-        console.log('LocalStrategy: ', email, password);
+  new LocalStrategy((email, password, done) => {
+    try {
+      console.log('LocalStrategy: ', email, password);
 
-        const user = await User.findOne({
-          where: {
-            email,
-          },
-          raw: true,
-        });
+      // const user = await User.findOne({
+      //   where: {
+      //     email,
+      //   },
+      //   raw: true,
+      // });
 
-        User.comparePassword(password, user.password, (err, matched) => {
-          if (err) {
-            throw err;
-          }
+      // User.comparePassword(password, user.password, (err, matched) => {
+      //   if (err) {
+      //     throw err;
+      //   }
 
-          if (matched) {
-            done(null, user);
-          } else {
-            done(null, false, { message: 'Invalid username / password' });
-          }
-        });
-      } catch (err) {
-        done(null, false, { message: 'Invalid username / password' });
-      }
-    },
-  ),
+      //   if (matched) {
+      //     done(null, user);
+      //   } else {
+      //     done(null, false, { message: 'Invalid username / password' });
+      //   }
+      // });
+    } catch (err) {
+      done(null, false, { message: 'Invalid username / password' });
+    }
+  }),
 );
 
 passport.use(
@@ -63,7 +60,7 @@ passport.use(
 );
 
 const sessionConfig = session({
-  store: new FileStore(),
+  store: new FileStore({ path: path.join(process.cwd(), 'sessions') }),
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: true,

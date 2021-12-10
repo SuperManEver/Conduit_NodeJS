@@ -33,19 +33,11 @@ async function checkLoginCredentialsPresence(req, res, next) {
   }
 }
 
-router.post('/users/login', checkLoginCredentialsPresence, (req, res, next) => {
-  console.log('CURRENT USER: ', res.locals.user);
-
-  /**
-   * 1. extract user's credentials from req's body
-   * 2. make sure required params are present
-   * 3. find user by given email
-   * 4. compare given password's hash with password in DB
-   * 5. if passwords are match return user's info and creat access token
-   */
-
-  res.json({ message: 'ok!' });
-});
+router.post(
+  '/users/login',
+  checkLoginCredentialsPresence,
+  UserController.login,
+);
 
 router.get('/user', authByToken, UserController.getUserByEmail);
 router.put(

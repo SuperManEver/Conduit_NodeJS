@@ -10,39 +10,41 @@ const { User } = require('../models');
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 
-passport.use(
-  new LocalStrategy(
-    // {
-    //   usernameField: 'email',
-    // },
-    async (email, password, done) => {
-      try {
-        console.log('LocalStrategy: ', email, password);
+// @todo: remove 'local' strategy for passport.js
 
-        const user = await User.findOne({
-          where: {
-            email,
-          },
-          raw: true,
-        });
+// passport.use(
+//   new LocalStrategy(
+//     // {
+//     //   usernameField: 'email',
+//     // },
+//     async (email, password, done) => {
+//       try {
+//         console.log('LocalStrategy: ', email, password);
 
-        User.comparePassword(password, user.password, (err, matched) => {
-          if (err) {
-            throw err;
-          }
+//         const user = await User.findOne({
+//           where: {
+//             email,
+//           },
+//           raw: true,
+//         });
 
-          if (matched) {
-            done(null, user);
-          } else {
-            done(null, false, { message: 'Invalid username / password' });
-          }
-        });
-      } catch (err) {
-        done(null, false, { message: 'Invalid username / password' });
-      }
-    },
-  ),
-);
+//         User.comparePassword(password, user.password, (err, matched) => {
+//           if (err) {
+//             throw err;
+//           }
+
+//           if (matched) {
+//             done(null, user);
+//           } else {
+//             done(null, false, { message: 'Invalid username / password' });
+//           }
+//         });
+//       } catch (err) {
+//         done(null, false, { message: 'Invalid username / password' });
+//       }
+//     },
+//   ),
+// );
 
 passport.use(
   new JWTStrategy(

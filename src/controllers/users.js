@@ -55,19 +55,19 @@ async function login(req, res) {
     console.log(result);
 
     /**
-     * 1. extract user's credentials from req's body
-     * 2. make sure required params are present
-     * 3. find user by given email
-     * 4. compare given password's hash with password in DB
+     * + 1. extract user's credentials from req's body
+     * + 2. make sure required params are present
+     * + 3. find user by given email
+     * + 4. compare given password's hash with password in DB
      * 5. if passwords are match return user's info and creat access token
      */
 
     res.json({ message: 'ok!' });
   } catch (e) {
     const status = res.statusCode ? res.statusCode : 500;
-    res
-      .status(status)
-      .json({ errors: { body: ['Could not create user ', e.message] } });
+    res.status(status).json({
+      errors: { body: ['Login failed', e.message].join(' ') },
+    });
   }
 }
 

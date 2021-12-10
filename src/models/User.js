@@ -39,11 +39,17 @@ User.beforeCreate(async (user) => {
 });
 
 User.prototype.comparePassword = function (candidatePassword) {
+  console.log(candidatePassword);
+
   return new Promise((resolve, reject) =>
     bcrypt.compare(candidatePassword, this.password, (err, same) => {
-      if (err || !same) {
+      if (err) {
         reject(err);
         return;
+      }
+
+      if (!same) {
+        reject(new Error('Invalid credentials'));
       }
 
       resolve(this.dataValues);

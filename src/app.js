@@ -7,8 +7,7 @@ const cors = require('cors');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 const { dbConnect } = require('./services/db');
 const { PORT } = require('./config');
-
-const { Article, User, Tag, Comment } = require('./models');
+const { passport, session } = require('./services/passport');
 
 const userRoute = require('./routes/users');
 const articleRoute = require('./routes/articles');
@@ -19,15 +18,18 @@ const favouriteRoute = require('./routes/favourites');
 
 const app = express();
 
-//CORS
+app.use(session);
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(cors({ credentials: true, origin: true }));
+app.use(morgan('tiny'));
 
 // what this does??
 const sync = async () => await dbConnect.sync({ alter: true });
 sync();
-
-app.use(express.json());
-app.use(morgan('tiny'));
 
 app.get('/', (req, res) => {
   res.json({ status: 'API is running' });

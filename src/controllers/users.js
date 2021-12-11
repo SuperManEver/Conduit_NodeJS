@@ -1,3 +1,5 @@
+const omit = require('lodash/omit');
+
 const { User } = require('../models');
 const { hashPassword, matchPassword } = require('../utils/password');
 const { signAccessToken } = require('../utils/auth');
@@ -37,10 +39,6 @@ async function createUser(req, res) {
 
 async function login(req, res) {
   try {
-    /**
-     * @todo: probably this should be migrated to controller
-     */
-
     const { email, password } = res.locals.user;
 
     const user = await User.findOne({ where: { email } });
@@ -50,19 +48,21 @@ async function login(req, res) {
       throw new Error('Invalid credentials');
     }
 
-    const result = await user.comparePassword(password);
+    const loggedInUser = await user.comparePassword(password);
 
-    console.log(result);
+    if (!loggedInUser) {
+      res.status(403);
+      throw new Error('Invalid credentials');
+    }
 
-    /**
-     * + 1. extract user's credentials from req's body
-     * + 2. make sure required params are present
-     * + 3. find user by given email
-     * + 4. compare given password's hash with password in DB
-     * 5. if passwords are match return user's info and creat access token
-     */
+    const result = {
+      user: {
+        ...omit(loggedInUser, ['password']),
+        token: signAccessToken(loggedInUser),
+      },
+    };
 
-    res.json({ message: 'ok!' });
+    res.json(result);
   } catch (e) {
     const status = res.statusCode ? res.statusCode : 500;
     res.status(status).json({

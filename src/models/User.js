@@ -38,15 +38,23 @@ User.beforeCreate(async (user) => {
   user.password = await encryptPassword(user.password);
 });
 
-User.comparePassword = (candidatePassword, password, next) => {
-  console.log('comparePassword: ', candidatePassword, password);
+User.prototype.comparePassword = function (candidatePassword) {
+  console.log(candidatePassword);
 
-  bcrypt.compare(candidatePassword, password, (err, same) => {
-    if (err) {
-      return next(err);
-    }
-    next(null, same);
-  });
+  return new Promise((resolve, reject) =>
+    bcrypt.compare(candidatePassword, this.password, (err, same) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      if (!same) {
+        reject(new Error('Invalid credentials'));
+      }
+
+      resolve(this.dataValues);
+    }),
+  );
 };
 
 module.exports = User;

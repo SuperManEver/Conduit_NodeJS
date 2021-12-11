@@ -1,7 +1,6 @@
 const path = require('path');
 const process = require('process');
 const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
 const passportJWT = require('passport-jwt');
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
@@ -12,34 +11,7 @@ const { User } = require('../models');
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 
-passport.use(
-  new LocalStrategy((email, password, done) => {
-    try {
-      console.log('LocalStrategy: ', email, password);
-
-      // const user = await User.findOne({
-      //   where: {
-      //     email,
-      //   },
-      //   raw: true,
-      // });
-
-      // User.comparePassword(password, user.password, (err, matched) => {
-      //   if (err) {
-      //     throw err;
-      //   }
-
-      //   if (matched) {
-      //     done(null, user);
-      //   } else {
-      //     done(null, false, { message: 'Invalid username / password' });
-      //   }
-      // });
-    } catch (err) {
-      done(null, false, { message: 'Invalid username / password' });
-    }
-  }),
-);
+// @todo: remove 'local' strategy for passport.js
 
 passport.use(
   new JWTStrategy(

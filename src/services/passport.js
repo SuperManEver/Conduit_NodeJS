@@ -9,21 +9,40 @@ const { SESSION_SECRET, ACCESS_TOKEN_SECRET } = require('../config');
 const { User } = require('../models');
 
 const JWTStrategy = passportJWT.Strategy;
-const ExtractJWT = passportJWT.ExtractJwt;
 
-// @todo: remove 'local' strategy for passport.js
+const AUTH_HEADER = 'authorization';
+
+function customTokenExtract() {
+  return function (request) {
+    let token = null;
+
+    if (request.headers[AUTH_HEADER]) {
+      const value = request.headers[AUTH_HEADER].split(/\s{1,}/);
+
+      if (value[1]) {
+        return value[1];
+      }
+    }
+
+    return token;
+  };
+}
 
 passport.use(
   new JWTStrategy(
     {
-      jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: customTokenExtract(),
       secretOrKey: ACCESS_TOKEN_SECRET,
     },
     async (jwtPaylod, done) => {
       try {
-        const user = await User.findOne({ where: { email: jwtPaylod.email } });
+        const { user } = jwtPaylod;
 
-        done(null, user);
+        const loggedInUser = await User.findOne({
+          where: { email: user.email },
+        });
+
+        done(null, loggedInUser);
       } catch (err) {
         done(err, null);
       }

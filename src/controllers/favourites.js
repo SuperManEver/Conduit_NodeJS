@@ -1,4 +1,4 @@
-const { User, Tag, Article } = require('../models');
+const { Tag, Article } = require('../models');
 
 function sanitizeOutput(article, user, count) {
   const newTagList = [];
@@ -25,10 +25,12 @@ module.exports.addFavourite = async (req, res) => {
       res.status(404);
       throw new Error('Article not found');
     }
+
     await article.addUsers(req.user.email);
     const user = await article.getUser();
     const count = await article.countUsers();
     article = sanitizeOutput(article, user, count);
+
     res.json(article);
   } catch (e) {
     const code = res.statusCode ? res.statusCode : 422;

@@ -4,9 +4,10 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --config=jest.config.js",
     "start": "node ./src/app.js",
-    "start:dev": "nodemon ./src/app.js --watch ./src"
+    "start:dev": "nodemon ./src/app.js --watch ./src",
+    "lint": "eslint"
   },
   "repository": {
     "type": "git",
@@ -39,6 +40,7 @@
   },
   "devDependencies": {
     "eslint": "^8.4.0",
+    "jest": "^27.4.5",
     "nodemon": "^2.0.15"
   },
   "volta": {

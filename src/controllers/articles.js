@@ -2,6 +2,8 @@ const { User, Tag, Article } = require('../models');
 const { slugify } = require('../utils/stringUtil');
 const { sequelize } = require('../services/db');
 
+const { sanitizeOutputMultiple } = require('./serializers');
+
 function sanitizeOutput(article, user) {
   const newTagList = [];
   for (let t of article.dataValues.Tags) {
@@ -19,28 +21,7 @@ function sanitizeOutput(article, user) {
   }
 }
 
-function sanitizeOutputMultiple(article) {
-  const newTagList = [];
-  for (let t of article.dataValues.Tags) {
-    newTagList.push(t.name);
-  }
-  delete article.dataValues.Tags;
-  article.dataValues.tagList = newTagList;
-
-  let user = {
-    username: article.dataValues.User.username,
-    email: article.dataValues.User.email,
-    bio: article.dataValues.User.bio,
-    image: article.dataValues.User.image,
-  };
-
-  delete article.dataValues.User;
-  article.dataValues.author = user;
-
-  return article;
-}
-
-module.exports.createArticle = async (req, res) => {
+async function createArticle(req, res) {
   try {
     if (!req.body.article) throw new Error('No articles data');
     const data = req.body.article;
@@ -50,8 +31,13 @@ module.exports.createArticle = async (req, res) => {
 
     // Find out author object
     const user = await User.findByPk(req.user.email);
-    if (!user) throw new Error('User does not exist');
+
+    if (!user) {
+      throw new Error('User does not exist');
+    }
+
     const slug = slugify(data.title);
+
     let article = await Article.create({
       slug: slug,
       title: data.title,
@@ -81,13 +67,12 @@ module.exports.createArticle = async (req, res) => {
       errors: { body: ['Could not create article', e.message] },
     });
   }
-};
+}
 
-module.exports.getSingleArticleBySlug = async (req, res) => {
+async function getSingleArticleBySlug(req, res) {
   try {
     const { slug } = req.params;
-    console.log('HEllo');
-    console.log(slug);
+
     let article = await Article.findByPk(slug, { include: Tag });
 
     const user = await article.getUser();
@@ -100,9 +85,9 @@ module.exports.getSingleArticleBySlug = async (req, res) => {
       errors: { body: ['Could not get article', e.message] },
     });
   }
-};
+}
 
-module.exports.updateArticle = async (req, res) => {
+async function updateArticle(req, res) {
   try {
     if (!req.body.article) throw new Error('No articles data');
     const data = req.body.article;
@@ -136,16 +121,15 @@ module.exports.updateArticle = async (req, res) => {
     });
 
     article = sanitizeOutput(updatedArticle, user);
-    res.status(200).json({ article });
   } catch (e) {
     const code = res.statusCode ? res.statusCode : 422;
     return res.status(code).json({
       errors: { body: ['Could not update article', e.message] },
     });
   }
-};
+}
 
-module.exports.deleteArticle = async (req, res) => {
+async function deleteArticle(req, res) {
   try {
     const slugInfo = req.params.slug;
     let article = await Article.findByPk(slugInfo, { include: Tag });
@@ -170,95 +154,76 @@ module.exports.deleteArticle = async (req, res) => {
       errors: { body: ['Could not delete article', e.message] },
     });
   }
-};
+}
 
-module.exports.getAllArticles = async (req, res) => {
+function getTagOptions(tag) {
+  if (!tag) {
+    return {
+      model: Tag,
+      attributes: ['name'],
+    };
+  }
+
+  return {
+    model: Tag,
+    attributes: ['name'],
+    where: { name: tag },
+  };
+}
+
+function getAuthorOptions(author) {
+  if (!author) {
+    return {
+      model: User,
+      attributes: ['email', 'username', 'bio', 'image'],
+    };
+  }
+
+  return {
+    model: User,
+    attributes: ['email', 'username', 'bio', 'image'],
+    where: { username: author },
+  };
+}
+
+async function getAllArticles(req, res) {
   try {
-    //Get all articles:
+    // Get all articles:
 
     const { tag, author, limit = 20, offset = 0 } = req.query;
-    let article;
-    if (!author && tag) {
-      article = await Article.findAll({
-        include: [
-          {
-            model: Tag,
-            attributes: ['name'],
-            where: { name: tag },
-          },
-          {
-            model: User,
-            attributes: ['email', 'username', 'bio', 'image'],
-          },
-        ],
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-      });
-    } else if (author && !tag) {
-      article = await Article.findAll({
-        include: [
-          {
-            model: Tag,
-            attributes: ['name'],
-          },
-          {
-            model: User,
-            attributes: ['email', 'username', 'bio', 'image'],
-            where: { username: author },
-          },
-        ],
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-      });
-    } else if (author && tag) {
-      article = await Article.findAll({
-        include: [
-          {
-            model: Tag,
-            attributes: ['name'],
-            where: { name: tag },
-          },
-          {
-            model: User,
-            attributes: ['email', 'username', 'bio', 'image'],
-            where: { username: author },
-          },
-        ],
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-      });
-    } else {
-      article = await Article.findAll({
-        include: [
-          {
-            model: Tag,
-            attributes: ['name'],
-          },
-          {
-            model: User,
-            attributes: ['email', 'username', 'bio', 'image'],
-          },
-        ],
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-      });
-    }
+
+    /**
+     * @todo: split into subfunctions
+     * logic for determining required include attributes can be extracted!
+     */
+
+    const article = await Article.findAll({
+      include: [getTagOptions(tag), getAuthorOptions(author)],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+    });
+
+    /**
+     * @todo: looks like serialization
+     */
     let articles = [];
+
     for (let t of article) {
       let addArt = sanitizeOutputMultiple(t);
+
       articles.push(addArt);
     }
 
-    res.json({ articles });
+    res.json({ articles, articlesCount: articles.length });
   } catch (e) {
     const code = res.statusCode ? res.statusCode : 422;
     return res.status(code).json({
-      errors: { body: ['Could not create article', e.message] },
+      errors: { body: ['Could not get all articles', e.message] },
     });
   }
-};
+}
 
-module.exports.getFeed = async (req, res) => {
+async function getFeed(req, res) {
   console.log('getFeed');
 
   try {
@@ -266,6 +231,7 @@ module.exports.getFeed = async (req, res) => {
             SELECT UserEmail
             FROM followers
             WHERE followerEmail = "${req.user.email}"`;
+
     const followingUsers = await sequelize.query(query);
     if (followingUsers[0].length == 0) {
       return res.json({ articles: [] });
@@ -295,4 +261,15 @@ module.exports.getFeed = async (req, res) => {
       errors: { body: ['Could not get feed ', e.message] },
     });
   }
+}
+
+module.exports = {
+  createArticle,
+  getSingleArticleBySlug,
+  updateArticle,
+  deleteArticle,
+  getAllArticles,
+  getFeed,
+  getTagOptions,
+  getAuthorOptions,
 };
